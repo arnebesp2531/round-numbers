@@ -1,0 +1,7 @@
+# Streamlit Community Cloud (external backend) dependency set.
+# Snowflake in Streamlit resolves packages from environment.yml instead.
+streamlit>=1.40
+pandas>=2.0
+numpy>=1.26
+altair>=5.0
+snowflake-connector-python[pandas]>=3.12

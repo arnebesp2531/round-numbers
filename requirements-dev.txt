@@ -1,0 +1,4 @@
+# Local development only. Community Cloud installs requirements.txt, so test
+# tooling is kept out of that file to keep the deployed environment small.
+-r requirements.txt
+pytest>=8.0

@@ -1,0 +1,9 @@
+# Streamlit in Snowflake package manifest.
+# SiS supplies streamlit, snowflake-snowpark-python, pandas and numpy itself;
+# only extras need listing. Everything here must exist in the Snowflake Anaconda
+# channel.
+name: sf_env
+channels:
+  - snowflake
+dependencies:
+  - altair

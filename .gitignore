@@ -1,0 +1,34 @@
+# --- Secrets: never commit ---------------------------------------------------
+# This repo is public. Real credentials live only in Streamlit Community Cloud's
+# secrets manager. Only the .example template is tracked.
+.streamlit/secrets.toml
+*.p8
+*.pem
+*.key
+rsa_key*
+.env
+.env.*
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# --- Tooling -----------------------------------------------------------------
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Editors / OS ------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
