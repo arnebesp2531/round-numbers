@@ -2,6 +2,13 @@
 # SiS supplies streamlit, snowflake-snowpark-python, pandas and numpy itself;
 # only extras need listing. Everything here must exist in the Snowflake Anaconda
 # channel.
+#
+# The Streamlit version is chosen when the SiS app is created, not here. Pick
+# 1.49 or later, or the newest on offer. Two things need it:
+#   * the comparison page styles its number cards through the `st-key-<key>`
+#     class Streamlit emits for a keyed container (1.39+), and
+#   * the results page sizes its charts with `st.altair_chart(..., width=...)`
+#     (1.49+), the replacement for the deprecated `use_container_width`.
 name: sf_env
 channels:
   - snowflake

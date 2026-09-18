@@ -1,7 +1,13 @@
 # Streamlit Community Cloud (external backend) dependency set.
 # Snowflake in Streamlit resolves packages from environment.yml instead.
-streamlit>=1.40
+# 1.49 is the floor: the results page sizes charts with the `width` argument
+# that replaced the now-deprecated `use_container_width`.
+streamlit>=1.49
 pandas>=2.0
 numpy>=1.26
 altair>=5.0
 snowflake-connector-python[pandas]>=3.12
+# Already a connector dependency, named explicitly because app/db.py imports it
+# directly to turn the PEM private key from secrets into the DER bytes the
+# connector wants.
+cryptography>=42.0
