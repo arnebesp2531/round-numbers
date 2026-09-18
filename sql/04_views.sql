@@ -100,3 +100,64 @@ SELECT
     1.0 / COUNT(*)   AS WEIGHT
 FROM COMPARISONS
 GROUP BY RESPONDENT_ID;
+
+-- The remaining views exist so the app never needs SELECT on a write table.
+-- Snowflake views run with the definer's rights, so granting SELECT on these
+-- to the service role exposes exactly these columns and nothing else. Every
+-- read in app/queries.py goes through a view or through NUMBERS.
+
+-- One row, for the results-page confidence footer.
+CREATE OR REPLACE VIEW V_COLLECTION_TOTALS
+COMMENT = 'Single-row collection progress summary for the results footer.'
+AS
+SELECT
+    (SELECT COUNT(*) FROM COMPARISONS)                        AS N_COMPARISONS,
+    (SELECT COUNT(*) FROM RESPONDENTS)                        AS N_RESPONDENTS,
+    (SELECT COUNT(DISTINCT RESPONDENT_ID) FROM COMPARISONS)   AS N_RESPONDENTS_COMPARING,
+    (SELECT COUNT(*) FROM SURVEY_RESPONSES)                   AS N_SURVEYS_SUBMITTED,
+    (SELECT COUNT(*) FROM V_PAIR_COUNTS WHERE N_COMPARISONS > 0) AS N_PAIRS_COVERED,
+    (SELECT COUNT(*) FROM V_PAIR_COUNTS)                      AS N_PAIRS_TOTAL;
+
+-- Feeds the random-number analysis: are "random" picks drawn toward round
+-- numbers, and did a respondent's pick shift after taking the test? LEFT JOIN
+-- because the intro row is written on intro submit and the survey row may
+-- never arrive.
+CREATE OR REPLACE VIEW V_RANDOM_NUMBER_PICKS
+COMMENT = 'Intro and closing number questions, one row per respondent.'
+AS
+SELECT
+    i.RESPONDENT_ID,
+    i.RANDOM_NUMBER,
+    i.UNIQUE_GUESS_NUMBER,
+    s.POST_RANDOM_NUMBER,
+    s.LEAST_ROUND_NUMBER,
+    i.SUBMITTED_AT AS INTRO_SUBMITTED_AT
+FROM INTRO_RESPONSES i
+LEFT JOIN SURVEY_RESPONSES s
+       ON s.RESPONDENT_ID = i.RESPONDENT_ID;
+
+-- Free text only. The results page renders these as text, never as markdown or
+-- HTML: they are written by one anonymous respondent and shown to others.
+CREATE OR REPLACE VIEW V_SURVEY_FREE_TEXT
+COMMENT = 'Survey free-text answers. Render as text, never as markdown/HTML.'
+AS
+SELECT
+    RESPONDENT_ID,
+    ROUNDNESS_DEFINITION,
+    INTUITION_FACTORS,
+    SUBMITTED_AT
+FROM SURVEY_RESPONSES
+WHERE ROUNDNESS_DEFINITION IS NOT NULL
+   OR INTUITION_FACTORS IS NOT NULL;
+
+-- Empty until 06_ai_classify_survey.sql has been hand-run, which is the signal
+-- for the results page to hide the classification panel entirely.
+CREATE OR REPLACE VIEW V_SURVEY_CLASSIFICATION_COUNTS
+COMMENT = 'Respondent counts per AI_CLASSIFY category.'
+AS
+SELECT
+    CLASSIFICATION,
+    COUNT(*) AS N_RESPONDENTS
+FROM SURVEY_CLASSIFICATIONS
+WHERE CLASSIFICATION IS NOT NULL
+GROUP BY CLASSIFICATION;
